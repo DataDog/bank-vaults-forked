@@ -128,7 +128,7 @@ func (v *vault) addAdditionalAuthConfig(authMethod auth) error {
 					}
 					err = v.configureAwsIdentityIntegration(authMethod.Path, configData)
 					if err != nil {
-						return errors.Wrap(err, "error configuring aws auth roles for vault")
+						return errors.Wrap(err, "error configuring aws identity integration")
 					}
 				default:
 					return errors.Wrap(err, "Unmanaged configuration option")
