@@ -115,6 +115,26 @@ func (v *vault) addAdditionalAuthConfig(authMethod auth) error {
 				return errors.Wrap(err, "error configuring aws auth cross account roles for vault")
 			}
 		}
+		if authMethod.Config != nil {
+			slog.Info(fmt.Sprintf("ikraemer - auth method config: %s", authMethod.Config))
+			// Generic configuration of AWS authentication, YAML config file should have the proper format
+			for configOption, configDataRaw := range authMethod.Config {
+				slog.Info(fmt.Sprintf("ikraemer - auth method config option: %s", configOption))
+				switch configOption {
+				case "identity-integration":
+					configData, err := cast.ToStringMapE(configDataRaw)
+					if err != nil {
+						return errors.Wrap(err, "error converting configDataRaw for AWS authentication")
+					}
+					err = v.configureAwsIdentityIntegration(authMethod.Path, configData)
+					if err != nil {
+						return errors.Wrap(err, "error configuring aws identity integration")
+					}
+				default:
+					return errors.Wrap(err, "Unmanaged configuration option")
+				}
+			}
+		}
 		err = v.configureGenericAuthRoles(authMethod.Type, authMethod.Path, "role", authMethod.Roles)
 		if err != nil {
 			return errors.Wrap(err, "error configuring aws auth roles for vault")
@@ -255,6 +275,16 @@ func (v *vault) configureAwsConfig(path string, config map[string]interface{}) e
 	_, err := v.writeWithWarningCheck(fmt.Sprintf("auth/%s/config/client", path), config)
 	if err != nil {
 		return errors.Wrap(err, "error putting aws config into vault")
+	}
+
+	return nil
+}
+
+func (v *vault) configureAwsIdentityIntegration(path string, config map[string]interface{}) error {
+	// https://developer.hashicorp.com/vault/api-docs/auth/aws#configure-identity-integration
+	_, err := v.writeWithWarningCheck(fmt.Sprintf("auth/%s/config/identity", path), config)
+	if err != nil {
+		return errors.Wrap(err, "error configuring aws identity integration into vault")
 	}
 
 	return nil
