@@ -116,35 +116,26 @@ func (v *vault) addAdditionalAuthConfig(authMethod auth) error {
 			}
 		}
 		if authMethod.Config != nil {
-			fmt.Print("ikraemer DEBUG")
-			fmt.Print(authMethod.Config)
+			slog.Info(fmt.Sprintf("ikraemer - auth method config: %s", authMethod.Config))
 			// Generic configuration of AWS authentication, YAML config file should have the proper format
 			for configOption, configData := range authMethod.Config {
-				fmt.Print(configOption)
-				fmt.Print(configData)
-				configData, err := cast.ToSliceE(configData)
+				slog.Info(fmt.Sprintf("ikraemer - auth method config option: %s", configOption))
+				configDataRaw, err := cast.ToSliceE(configData)
 				if err != nil {
 					return errors.Wrap(err, "error converting config data for AWS authentication")
 				}
-				for _, subConfigData := range configData {
-					subConfigData, err := cast.ToStringMapE(subConfigData)
+				configData, err := cast.ToStringMapE(configDataRaw)
+				if err != nil {
+					return errors.Wrapf(err, "error converting configDataRaw for AW integration")
+				}
+				switch configOption {
+				case "identity-integration":
+					err = v.configureAwsIdentityIntegration(authMethod.Path, configData)
 					if err != nil {
-						return errors.Wrap(err, "error converting sub config data for AWS authentication")
-					}
-					name, ok := subConfigData["name"]
-					if !ok {
-						return errors.Errorf("error finding sub config data name for AWS authentication: %s", configOption)
-					}
-					switch name {
-					case "identity-integration":
-						err = v.configureAwsIdentityIntegration(authMethod.Path, authMethod.Config)
-						if err != nil {
-							return errors.Wrap(err, "error configuring aws auth roles for vault")
-						}
+						return errors.Wrap(err, "error configuring aws auth roles for vault")
 					}
 				}
 			}
-
 		}
 		err = v.configureGenericAuthRoles(authMethod.Type, authMethod.Path, "role", authMethod.Roles)
 		if err != nil {
