@@ -115,6 +115,37 @@ func (v *vault) addAdditionalAuthConfig(authMethod auth) error {
 				return errors.Wrap(err, "error configuring aws auth cross account roles for vault")
 			}
 		}
+		if authMethod.Config != nil {
+			fmt.Print("ikraemer DEBUG")
+			fmt.Print(authMethod.Config)
+			// Generic configuration of AWS authentication, YAML config file should have the proper format
+			for configOption, configData := range authMethod.Config {
+				fmt.Print(configOption)
+				fmt.Print(configData)
+				configData, err := cast.ToSliceE(configData)
+				if err != nil {
+					return errors.Wrap(err, "error converting config data for AWS authentication")
+				}
+				for _, subConfigData := range configData {
+					subConfigData, err := cast.ToStringMapE(subConfigData)
+					if err != nil {
+						return errors.Wrap(err, "error converting sub config data for AWS authentication")
+					}
+					name, ok := subConfigData["name"]
+					if !ok {
+						return errors.Errorf("error finding sub config data name for AWS authentication: %s", configOption)
+					}
+					switch name {
+					case "identity-integration":
+						err = v.configureAwsIdentityIntegration(authMethod.Path, authMethod.Config)
+						if err != nil {
+							return errors.Wrap(err, "error configuring aws auth roles for vault")
+						}
+					}
+				}
+			}
+
+		}
 		err = v.configureGenericAuthRoles(authMethod.Type, authMethod.Path, "role", authMethod.Roles)
 		if err != nil {
 			return errors.Wrap(err, "error configuring aws auth roles for vault")
@@ -255,6 +286,16 @@ func (v *vault) configureAwsConfig(path string, config map[string]interface{}) e
 	_, err := v.writeWithWarningCheck(fmt.Sprintf("auth/%s/config/client", path), config)
 	if err != nil {
 		return errors.Wrap(err, "error putting aws config into vault")
+	}
+
+	return nil
+}
+
+func (v *vault) configureAwsIdentityIntegration(path string, config map[string]interface{}) error {
+	// https://developer.hashicorp.com/vault/api-docs/auth/aws#configure-identity-integration
+	_, err := v.writeWithWarningCheck(fmt.Sprintf("auth/%s/config/identity", path), config)
+	if err != nil {
+		return errors.Wrap(err, "error configuring aws identity integration into vault")
 	}
 
 	return nil
