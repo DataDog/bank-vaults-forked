@@ -120,16 +120,18 @@ func (v *vault) addAdditionalAuthConfig(authMethod auth) error {
 			// Generic configuration of AWS authentication, YAML config file should have the proper format
 			for configOption, configDataRaw := range authMethod.Config {
 				slog.Info(fmt.Sprintf("ikraemer - auth method config option: %s", configOption))
-				configData, err := cast.ToStringMapE(configDataRaw)
-				if err != nil {
-					return errors.Wrap(err, "error converting configDataRaw for AWS authentication")
-				}
 				switch configOption {
 				case "identity-integration":
+					configData, err := cast.ToStringMapE(configDataRaw)
+					if err != nil {
+						return errors.Wrap(err, "error converting configDataRaw for AWS authentication")
+					}
 					err = v.configureAwsIdentityIntegration(authMethod.Path, configData)
 					if err != nil {
 						return errors.Wrap(err, "error configuring aws auth roles for vault")
 					}
+				default:
+					return errors.Wrap(err, "Unmanaged configuration option")
 				}
 			}
 		}
