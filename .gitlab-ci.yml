@@ -9,3 +9,4 @@ test:
 
 build-docker-image:
   extends: .build-docker-image
+  error testing keystore before init
