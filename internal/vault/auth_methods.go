@@ -120,7 +120,6 @@ func (v *vault) addAdditionalAuthConfig(authMethod auth) error {
 				return errors.Wrap(err, "error configuring aws auth cross account roles for vault")
 			}
 		}
-
 		err = v.configureGenericAuthRoles(authMethod.Type, authMethod.Path, "role", authMethod.Roles)
 		if err != nil {
 			return errors.Wrap(err, "error configuring aws auth roles for vault")
