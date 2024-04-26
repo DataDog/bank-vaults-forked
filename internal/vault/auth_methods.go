@@ -446,12 +446,11 @@ func (v *vault) addManagedAuthMethods(managedAuths []auth) error {
 
 		// This configuration only makes sense if authentication is done against AWS
 		// However, AWS authentication can be configured using an "aws" or "plugin" backend.
-		// Since it's not specific for only one backend type, I put this code here,
+		// Since it's not specific for only one backend type,
+		// this code lives in this function rather than in addAdditionalAuthConfig
 		if authMethod.Config != nil {
-			slog.Info(fmt.Sprintf("ikraemer - auth method config: %s", authMethod.Config))
-			// Generic configuration of Plugin authentication, YAML config file should have the proper format
 			for configOption, configDataRaw := range authMethod.Config {
-				slog.Info(fmt.Sprintf("ikraemer - auth method config option: %s", configOption))
+				slog.Debug(fmt.Sprintf("Handling auth method config option: %s", configOption))
 				switch configOption {
 				case "aws-identity-integration":
 					configData, err := cast.ToStringMapE(configDataRaw)
