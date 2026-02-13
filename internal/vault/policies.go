@@ -20,7 +20,7 @@ import (
 	"strings"
 
 	"emperror.dev/errors"
-	"github.com/hashicorp/hcl"
+	"github.com/hashicorp/hcl/v2"
 	hclPrinter "github.com/hashicorp/hcl/hcl/printer"
 	"github.com/hashicorp/vault/api"
 )
