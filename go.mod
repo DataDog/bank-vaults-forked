@@ -1,6 +1,6 @@
 module github.com/bank-vaults/bank-vaults
 
-go 1.24.1
+go 1.25.0
 
 require (
 	cloud.google.com/go/storage v1.57.1
@@ -30,7 +30,7 @@ require (
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/oauth2 v0.33.0
+	golang.org/x/oauth2 v0.36.0
 	google.golang.org/api v0.256.0
 	k8s.io/api v0.34.2
 	k8s.io/apimachinery v0.34.2
