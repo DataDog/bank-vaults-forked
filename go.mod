@@ -2,6 +2,8 @@ module github.com/bank-vaults/bank-vaults
 
 go 1.24.1
 
+toolchain go1.26.2
+
 require (
 	cloud.google.com/go/storage v1.57.1
 	emperror.dev/errors v0.8.1
