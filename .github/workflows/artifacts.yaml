@@ -67,7 +67,7 @@ jobs:
 
       - name: Set image name
         id: image-name
-        run: echo "value=ghcr.io/${{ github.repository }}" >> "$GITHUB_OUTPUT"
+        run: echo "value=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
 
       - name: Gather build metadata
         id: meta
